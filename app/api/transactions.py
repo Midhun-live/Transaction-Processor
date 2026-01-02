@@ -1,6 +1,6 @@
 from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
-
+from fastapi import HTTPException
 from app.schema.transaction import TransactionWebhook, TransactionResponse
 from app.database.session import SessionLocal
 from app.repository.transaction_repo import (
@@ -35,4 +35,12 @@ def receive_transaction(
     response_model=TransactionResponse
 )
 def fetch_transaction(transaction_id: str, db: Session = Depends(get_db)):
-    return get_transaction(db, transaction_id)
+    tx = get_transaction(db, transaction_id)
+
+    if not tx:
+        raise HTTPException(
+            status_code=404,
+            detail="Transaction not found"
+        )
+
+    return tx
