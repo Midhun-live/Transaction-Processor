@@ -21,13 +21,12 @@ def get_db():
 
 @router.post("/webhooks/transactions", status_code=202)
 def receive_transaction(
-    payload: TransactionWebhook,
+    dataPayload: TransactionWebhook,
     background_tasks: BackgroundTasks,
 ):
 
-    background_tasks.add_task(process_transaction_workflow, payload.transaction_id)
-
-    return {"acknowledged": True}
+    background_tasks.add_task(process_transaction_workflow, dataPayload)
+    return Response(status_code=status.HTTP_202_ACCEPTED)
 
 
 @router.get(
