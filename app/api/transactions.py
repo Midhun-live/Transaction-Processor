@@ -7,7 +7,7 @@ from app.repository.transaction_repo import (
     create_if_absent,
     get_transaction,
 )
-from app.services.transaction_service import process_transaction
+from app.services.transaction_service import process_transaction_workflow
 
 router = APIRouter(prefix="/v1")
 
@@ -23,12 +23,9 @@ def get_db():
 def receive_transaction(
     payload: TransactionWebhook,
     background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db),
 ):
-    tx = create_if_absent(db, payload)
 
-    if tx.status == "PROCESSING":
-        background_tasks.add_task(process_transaction, payload.transaction_id)
+    background_tasks.add_task(process_transaction_workflow, payload.transaction_id)
 
     return {"acknowledged": True}
 

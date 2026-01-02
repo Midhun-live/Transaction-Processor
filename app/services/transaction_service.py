@@ -1,12 +1,21 @@
-import time
 from app.database.session import SessionLocal
-from app.repository.transaction_repo import mark_as_processed
+from app.repository.transaction_repo import (
+    create_if_absent,
+    mark_as_processed,
+)
+import time
 
-def process_transaction(transaction_id: str):
-    time.sleep(30)
-
+def process_transaction_workflow(payload):
     db = SessionLocal()
     try:
-        mark_as_processed(db, transaction_id)
+        tx = create_if_absent(db, payload)
+
+        if tx.status != "PROCESSING":
+            return
+
+        # Simulate external API delay
+        time.sleep(30)
+
+        mark_as_processed(db, payload.transaction_id)
     finally:
         db.close()
