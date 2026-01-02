@@ -26,7 +26,7 @@ def receive_transaction(
 ):
 
     background_tasks.add_task(process_transaction_workflow, dataPayload)
-    return Response(status_code=status.HTTP_202_ACCEPTED)
+    return {"status": "accepted"}
 
 
 @router.get(
