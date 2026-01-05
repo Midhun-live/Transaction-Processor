@@ -8,6 +8,7 @@ from app.repository.transaction_repo import (
     get_transaction,
 )
 from app.services.transaction_service import process_transaction_workflow
+from typing import List
 
 router = APIRouter(prefix="/v1")
 
@@ -29,17 +30,22 @@ def receive_transaction(
     return {"status": "accepted"}
 
 
-@router.get(
-    "/transactions/{transaction_id}",
-    response_model=TransactionResponse
-)
+@router.get("/transactions/{transaction_id}")
 def fetch_transaction(transaction_id: str, db: Session = Depends(get_db)):
     tx = get_transaction(db, transaction_id)
 
     if not tx:
-        raise HTTPException(
-            status_code=404,
-            detail="Transaction not found"
-        )
+        return []   # instead of 404
 
-    return tx
+    return [{
+        "transaction_id": tx.transaction_id,
+        "source_account": tx.source_account,
+        "destination_account": tx.destination_account,
+        "amount": tx.amount,
+        "currency": tx.currency,
+        "status": tx.status,
+        "created_at": tx.created_at,
+        "processed_at": tx.processed_at,
+    }]
+
+    return [TransactionResponse.from_orm(tx)]

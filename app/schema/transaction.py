@@ -19,3 +19,6 @@ class TransactionResponse(BaseModel):
     status: str
     created_at: datetime
     processed_at: Optional[datetime]
+
+    class Config:
+        orm_mode = True
